@@ -2,7 +2,7 @@ from datetime import datetime
 import heapq
 
 
-class LogAlerts:
+class LogAlert:
     def __init__(self, time_window, threshold):
         self.time_window = time_window
         self.threshold = threshold
