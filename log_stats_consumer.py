@@ -1,7 +1,7 @@
 from collections import Counter
 
 
-class LogStats:
+class LogStatsConsumer:
     def __init__(self, interval=10):
         self.interval = interval
         self.count_segments = Counter()

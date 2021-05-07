@@ -2,7 +2,7 @@ from datetime import datetime
 import threading
 
 
-class LogAlert(threading.Thread):
+class LogAlertConsumer(threading.Thread):
     def __init__(self, time_window, alert_queue, threshold):
         self.alert_queue = alert_queue
         self.time_window = time_window
