@@ -20,13 +20,15 @@ class LogAlertConsumer(threading.Thread):
                 timestamp = self.alert_queue.get()
                 self.add_timestamp(timestamp)
 
-                if not self.window_start:
+                # Since the start time may not be the first line
+                if not self.window_start or self.window_start > timestamp:
                     self.window_start = timestamp
 
-                if (timestamp - self.window_start) > self.time_window:
+                # Timestamps may skip a second so can't be exact
+                if (timestamp - self.window_start) >= self.time_window:
                     self.remove_out_of_window_timestamp()
                     self.should_alert_or_recover(timestamp)
-                    self.window_start = self.alert_queue[0]
+                    self.window_start += 1
 
     def add_timestamp(self, timestamp):
         key = timestamp % (self.time_window + 1)
@@ -34,7 +36,6 @@ class LogAlertConsumer(threading.Thread):
         if not old_timestamp:
             self.hashed[key] = [timestamp, 1]
         elif old_timestamp == timestamp:
-            count += 1
             self.hashed[key] = [timestamp, count + 1]
         self.total_count += 1
 
