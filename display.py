@@ -1,16 +1,21 @@
 import curses
+import threading
 
 
-def display(stdscr):
-    curses.curs_set(0)
+class Display(threading.Thread):
+    def __init__(self, stats, alerts):
+        self.stats = stats
+        self.alerts = alerts
+        self.stdscr = curses.initscr()
 
-    max_height, max_width = stdscr.getmaxyx()
-    stdscr.addstr(1, 1, "HTTP Monitoring App")
-    window_border = stdscr.subwin(max_height-1, max_width, 0, 0)
-    window_border.border()
-    stdscr.refresh()
-    stdscr.getkey()
+    def display(self):
+        curses.curs_set(0)
 
+        max_height, max_width = self.stdscr.getmaxyx()
+        self.stdscr.addstr(1, 1, "HTTP Log Monitoring")
+        window_border = self.stdscr.subwin(max_height-1, max_width, 0, 0)
+        window_border.border()
 
-if __name__ == '__main__':
-    curses.wrapper(display)
+        self.stdscr.addstr(5, 1, "Stats from the Last 10 Seconds")
+        self.stdscr.addstr(6, 1, str(self.stats.count_sections))
+        self.stdscr.getkey()
