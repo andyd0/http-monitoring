@@ -19,8 +19,10 @@ class LogAlertConsumer(threading.Thread):
             while self.timestamps_queue:
                 timestamp = self.timestamps_queue.popleft()
 
+                # Grab all timestamps that are same (may be out of order)
                 self.alert_queue.append(timestamp)
-                while self.timestamps_queue and self.timestamps_queue[0] == timestamp:
+                while self.timestamps_queue and \
+                        self.timestamps_queue[0] == timestamp:
                     self.alert_queue.append(self.timestamps_queue.popleft())
 
                 # Since the start time may not be the first line
