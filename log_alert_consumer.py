@@ -1,24 +1,27 @@
+from collections import deque
 from datetime import datetime
 import threading
 
 
 class LogAlertConsumer(threading.Thread):
-    def __init__(self, time_window, threshold, alert_queue):
-        self.alert_queue = alert_queue
+    def __init__(self, time_window, threshold, timestamps_queue):
+        self.timestamps_queue = timestamps_queue
+        self.alert_queue = deque()
         self.time_window = time_window
         self.threshold = threshold
         self.window_start = None
-        self.hashed = {}
-        self.total_count = 0
         self.alerted = False
         self.thread_terminated = False
         self.message = ""
 
     def run(self):
         while not self.thread_terminated:
-            while self.alert_queue:
-                timestamp = self.alert_queue.get()
-                self.add_timestamp(timestamp)
+            while self.timestamps_queue:
+                timestamp = self.timestamps_queue.popleft()
+
+                self.alert_queue.append(timestamp)
+                while self.timestamps_queue and self.timestamps_queue[0] == timestamp:
+                    self.alert_queue.append(self.timestamps_queue.popleft())
 
                 # Since the start time may not be the first line
                 if not self.window_start or self.window_start > timestamp:
@@ -26,28 +29,16 @@ class LogAlertConsumer(threading.Thread):
 
                 # Timestamps may skip a second so can't be exact
                 if (timestamp - self.window_start) >= self.time_window:
-                    self.remove_out_of_window_timestamp()
                     self.should_alert_or_recover(timestamp)
                     self.window_start += 1
 
-    def add_timestamp(self, timestamp):
-        key = timestamp % (self.time_window + 1)
-        old_timestamp, count = self.hashed.get(key, [None, None])
-        if not old_timestamp:
-            self.hashed[key] = [timestamp, 1]
-        elif old_timestamp == timestamp:
-            self.hashed[key] = [timestamp, count + 1]
-        self.total_count += 1
-
-    def remove_out_of_window_timestamp(self):
-        key = self.window_start % (self.time_window + 1)
-        old_timestamp, count = self.hashed[key]
-        if old_timestamp == self.window_start:
-            self.total_count -= count
-            self.hashed[key] = [None, None]
+    def remove_out_of_window_timestamps(self):
+        while self.alert_queue and self.window_start > self.alert_queue[0]:
+            self.alert_queue.popleft()
 
     def has_breached_traffic(self):
-        return self.total_count / self.time_window > self.threshold
+        self.remove_out_of_window_timestamps()
+        return (len(self.alert_queue) / self.time_window) > self.threshold
 
     def should_alert_or_recover(self, timestamp):
         current_state = self.has_breached_traffic()
