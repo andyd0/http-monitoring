@@ -13,8 +13,9 @@ class LogAlertConsumer(threading.Thread):
         self.threshold = threshold
         self.alerted = False
         self.thread_terminated = False
-        self.message = ""
-        self.alert_count = 0
+
+        self.alert_data = {}
+        self.alert_data['alert_count'] = 0
 
     def run(self):
         start_real_time = time()
@@ -48,19 +49,15 @@ class LogAlertConsumer(threading.Thread):
             self.recovered_message(timestamp)
 
     def alert_message(self, timestamp):
-        self.alert_count += 1
+        self.alert_data['alert_count'] += 1
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        self.message = (
-            f'High traffic generated an alert - hits = '
-            f'{len(self.alert_queue)}, triggered at {date}'
-        )
+        self.alert_data['msg_line1'] = f'High traffic generated an alert:'
+        self.alert_data['msg_line2'] = f'hits = {len(self.alert_queue)}, triggered at {date}'
 
     def recovered_message(self, timestamp):
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        self.message = (
-            f'Traffic normalized - hits = {len(self.alert_queue)},'
-            f'recovered at {date}'
-        )
+        self.alert_data['msg_line1'] = f'Traffic normalized - hits = {len(self.alert_queue)}'
+        self.alert_data['msg_line2'] = f'recovered at {date}'
 
     def updated_alert_data(self):
-        return self.alert_count, self.message
+        return self.alert_data
