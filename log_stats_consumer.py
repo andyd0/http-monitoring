@@ -1,36 +1,37 @@
 from collections import Counter
-from collections import deque
+from time import time
 import threading
 
 
 class LogStatsConsumer(threading.Thread):
     def __init__(self, interval, logs_queue):
+        threading.Thread.__init__(self)
         self.interval = interval
         self.logs_queue = logs_queue
-        self.stats_queue = deque()
-        self.count_segments = Counter()
-        self.status_codes = Counter()
-        self.window_start = None
+        self.window_section_counts = None
+        self.window_status_counts = None
         self.thread_terminated = False
 
     def run(self):
+        section_counts, status_counts = Counter(), Counter()
+        start_real_time = time()
+
         while not self.thread_terminated:
-            while self.stats_queue:
+            if (time() - start_real_time) >= self.interval:
+                start_real_time = time()
+                self.save_stats(section_counts, status_counts)
+                section_counts, status_counts = Counter(), Counter()
 
-                log_data = self.alert_queue.popleft()
-                timestamp = log_data['time']
+    def update_counts(self, section_counts, status_counts):
+        while self.logs_queue:
+            log_data = self.logs_queue.popleft()
+            section_counts[log_data['section']] += 1
+            status_counts[log_data['status'][0]+"XX"] += 1
 
-                self.stats_queue.append(log_data)
+    def save_stats(self, section_counts, status_counts):
+        self.update_counts(section_counts, status_counts)
+        self.window_section_counts = Counter(section_counts)
+        self.window_status_counts = Counter(status_counts)
 
-                if not self.window_start or self.window_start > timestamp:
-                    self.window_start = log_data.timestamp
-
-                if (timestamp - self.window_start) > self.interval:
-                    self.reset_stats()
-
-                self.count_segments[log_data.segment] += 1
-                self.status_codes[log_data.status_code[0]+"XX"] += 1
-
-    def reset_stats(self):
-        self.count_segments = Counter()
-        self.status_codes = Counter()
+    def updated_stats(self):
+        return self.window_section_counts, self.window_status_counts

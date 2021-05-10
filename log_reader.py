@@ -6,32 +6,32 @@ import time
 
 class LogReader(threading.Thread):
     def __init__(self, log_file_path, alert_queue, stats_queue):
+        threading.Thread.__init__(self)
         self.log_file_path = log_file_path
         self.alert_queue = alert_queue
         self.stats_queue = stats_queue
         self.thread_terminated = False
 
     def run(self):
-        while not self.thread_terminated:
-            try:
-                log_file = open(self.log_file_path, "r")
-            except IOError:
-                raise "Unable to open log file"
+        try:
+            log_file = open(self.log_file_path, "r")
+        except IOError:
+            raise "Unable to open log file"
 
-            log_lines = self.tail_file(log_file)
-            for log_line in log_lines:
-                parsed_log_line = self.parse_log_line(log_line)
-                # Only add if the parsed line has been parsed correctly
-                if parsed_log_line:
-                    self.alert_queue.append(parsed_log_line['time'])
-                    self.stats_queue.append(parsed_log_line)
+        log_lines = self.tail_file(log_file)
+        for log_line in log_lines:
+            parsed_log_line = self.parse_log_line(log_line)
+            # Only add if the parsed line has been parsed correctly
+            if parsed_log_line:
+                self.alert_queue.append(parsed_log_line['time'])
+                self.stats_queue.append(parsed_log_line)
 
     # Tailing file implementation is from a presentation
     # discussing different tools leveraging Python generators
     # https://github.com/dabeaz/generators/
     def tail_file(self, log_file):
         log_file.seek(0, os.SEEK_END)
-        while True:
+        while not self.thread_terminated:
             line = log_file.readline()
             if not line:
                 time.sleep(0.1)
