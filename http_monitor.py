@@ -31,12 +31,12 @@ if __name__ == '__main__':
     parser.add_argument('--threshold', action='store', type=int, default=10,
                         help='Set the threshold for number of requests per'
                         'second that after 2 minutes should trigger an alert.'
-                        'Default is 10 seconds')
+                        'Default is 10 seconds.')
     parser.add_argument('--time_window', action='store', type=int, default=120,
                         help='Set the window of time for alert. Default is '
-                        '120 seconds')
+                        '120 seconds.')
     parser.add_argument('--version', action='version')
 
     args = parser.parse_args()
 
-    start_monitoring(args.INPUT_FILE_PATH, args.threshold, args.time_window)
+    start_monitoring(args.INPUT_FILE_PATH, args.time_window, args.threshold)
