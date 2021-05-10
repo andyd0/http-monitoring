@@ -3,7 +3,23 @@ import threading
 
 
 class Display(threading.Thread):
+    """A class used to display data from the consumers using curses
+
+    Attributes:
+        reader (LogReader): Used to terminate thread if display is closed
+        stats (LogStatsConsumer): Provides stats data to display
+        alerts (LogAlertConsumer): Provides alert/recovered messaging
+        stdscr (curses): Used for writing to CLI
+        thread_terminated (boolean): Flag to kill thread
+    """
+
     def __init__(self, reader, stats, alerts):
+        """
+        Args:
+            reader (LogReader): LogReader class
+            stats (LogStatsConsumer): LogStatsConsumer class
+            alerts (LogAlertConsumer): LogalertConsumer
+        """
         threading.Thread.__init__(self)
         self.reader = reader
         self.stats = stats
@@ -12,6 +28,10 @@ class Display(threading.Thread):
         self.thread_terminated = False
 
     def run(self):
+        """
+        Starts the thread process and writes to screen the data from the
+        consumers
+        """
         curses.curs_set(0)
         self.stdscr.nodelay(1)
 
@@ -35,15 +55,13 @@ class Display(threading.Thread):
             if section_counts and status_counts:
                 y += 1
                 self.stdscr.addstr(y, 2, "Status Code Counts:")
-                lines = self.build_top_n(status_counts)
-                for line in lines:
+                for line in self.__build_top_n(status_counts):
                     y += 1
                     self.stdscr.addstr(y, 2, line)
 
                 y += 4
                 self.stdscr.addstr(y, 2, "Top Sections:")
-                lines = self.build_top_n(section_counts)
-                for line in lines:
+                for line in self.__build_top_n(section_counts):
                     y += 1
                     self.stdscr.addstr(y, 2, line)
 
@@ -69,7 +87,10 @@ class Display(threading.Thread):
                 self.alerts.thread_terminated = True
                 self.thread_terminated = True
 
-    def build_top_n(self, counts, n=3):
+    def __build_top_n(self, counts, n=3):
+        """
+        Takes Counters to get top n for printing to screen
+        """
         lines = []
         for code, count in counts.most_common(n):
             line = f'{code}: {count}'

@@ -4,6 +4,12 @@ import time
 
 
 def simulate(input_file, output_file):
+    """Starts up all of the services via threads
+
+    Args:
+        input_file_path (str): Path of file that has log data
+        output_file (int): Path of file that will have logs written to
+    """
     try:
         with open(input_file, "r") as log_lines:
             with open(output_file, 'w', buffering=1) as log_file:
