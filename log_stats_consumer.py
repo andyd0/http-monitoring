@@ -13,6 +13,7 @@ class LogStatsConsumer(threading.Thread):
         self.window_section_counts = None
         self.window_status_counts = None
         self.thread_terminated = False
+        self.hits = 0
 
     def run(self):
         section_counts, status_counts = Counter(), Counter()
@@ -29,6 +30,7 @@ class LogStatsConsumer(threading.Thread):
     def update_counts(self, section_counts, status_counts):
         while self.stats_queue:
             log_data = self.stats_queue.popleft()
+            self.hits += 1
             section_counts[log_data['section']] += 1
             status_counts[log_data['status'][0]+"XX"] += 1
 
@@ -37,5 +39,5 @@ class LogStatsConsumer(threading.Thread):
         self.window_section_counts = Counter(section_counts)
         self.window_status_counts = Counter(status_counts)
 
-    def updated_stats(self):
+    def updated_counts(self):
         return self.window_section_counts, self.window_status_counts

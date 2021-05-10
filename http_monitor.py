@@ -14,11 +14,11 @@ def start_monitoring(input_file_path, time_window, threshold):
     stats_queue = deque()
 
     reader = LogReader(input_file_path, alerts_queue, stats_queue)
-    # alerts = LogAlertConsumer(time_window, threshold, alerts_queue)
+    alerts = LogAlertConsumer(time_window, threshold, alerts_queue)
     stats = LogStatsConsumer(threshold, stats_queue)
-    display = Display(reader, stats, None)
+    display = Display(reader, stats, alerts)
 
-    threads = [reader, stats, display]
+    threads = [reader, display, stats, alerts]
     for t in threads:
         t.start()
 
