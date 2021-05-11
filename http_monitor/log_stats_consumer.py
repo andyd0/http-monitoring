@@ -54,7 +54,8 @@ class LogStatsConsumer(threading.Thread):
 
     def __update_counts(self, section_size, section_counts, status_counts):
         """
-        Gets log data from the local queue to update counts
+        Gets log data from the local queue to update counts and size
+        totals
         """
         while self.stats_queue:
             log_data = self.stats_queue.popleft()
@@ -71,8 +72,8 @@ class LogStatsConsumer(threading.Thread):
 
     def __save_stats(self, section_size, section_counts, status_counts):
         """
-        Copies the counters into data to be used by display
-        so that new ones can be created for next interval
+        Copies the counters into new counters to be used by display
+        so that counters locally can be reset for next interval
         """
         self.__update_counts(section_size, section_counts, status_counts)
         self.stats_data["section_size"] = dict(section_size)

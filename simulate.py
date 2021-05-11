@@ -17,6 +17,8 @@ def simulate(input_file, output_file):
                     if log_line:
                         log_file.write(log_line)
                     time.sleep(random())
+    except IOError:
+        raise "Unable to open log files"
     except KeyboardInterrupt:
         print("\nSimulation interrupted")
         with open(output_file, 'w') as log_file:
