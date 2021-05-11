@@ -109,13 +109,20 @@ class Display(threading.Thread):
 
         self.stdscr.addstr(4, 50, alert_heading)
 
+        y = 6
         if 'type' in alert_data:
             if alert_data['type'] == 'alert':
-                self.stdscr.addstr(6, 50, "Alert!!!", curses.color_pair(1))
+                self.stdscr.addstr(y, 50, "Alert!!!", curses.color_pair(1))
             else:
-                self.stdscr.addstr(6, 50, "Recovered", curses.color_pair(2))
-            self.stdscr.addstr(7, 50, alert_data['msg_line1'])
-            self.stdscr.addstr(8, 50, alert_data['msg_line2'])
+                last_alert = f'Last Alert Time {alert_data["last_alert_time"]}'
+                self.stdscr.addstr(y, 50, last_alert)
+                y += 2
+                self.stdscr.addstr(y, 50, "Recovered", curses.color_pair(2))
+
+            y += 1
+            self.stdscr.addstr(y, 50, alert_data['msg_line1'])
+            y += 1
+            self.stdscr.addstr(y, 50, alert_data['msg_line2'])
 
     def __build_status_lines(self, counts):
         """

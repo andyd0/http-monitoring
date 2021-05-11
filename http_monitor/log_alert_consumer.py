@@ -95,9 +95,11 @@ class LogAlertConsumer(threading.Thread):
         """
         Create alert message using timestamp from log
         """
-        self.alert_data['alert_count'] += 1
-        date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
         self.alert_data['type'] = 'alert'
+        self.alert_data['alert_count'] += 1
+
+        date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        self.alert_data['last_alert_time'] = date
         self.alert_data['msg_line1'] = f'High traffic generated an alert:'
         self.alert_data['msg_line2'] = (
             f'hits = {len(self.alert_queue)}, triggered at {date}'

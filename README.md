@@ -7,6 +7,7 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
 
 - [HTTP Log Monitoring App](#http-log-monitoring-app)
   - [Design](#design)
+    - [General Design](#general-design)
     - [Alerting System](#alerting-system)
   - [Instructions](#instructions)
     - [Requirements](#requirements)
@@ -24,6 +25,20 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
     - [Recovered State](#recovered-state)
 
 ## Design
+
+### General Design
+
+The general design follows the producer-consumer pattern. While the producer would be the devices creating the log lines, the consumers are set up here to take the logging information and process it to either provide statistics or generate alerts.
+
+`LogReader` - This not only tails the provided log file and parses the text, but also populates the queues that will be consumed by the two consumers.
+
+`LogAlertConsumer` - Alert consumer that takes a queue being populated by the `LogReader` and populates it's local queue to determine whether an alert should be triggerred or if the system has recovered from the alert. Alerting algorithm / system described below.
+
+`LogStatsConsumer` - Stats consumer that takes a separate queue being populated by the `LogReader` to compute stats for a provided interval time size.
+
+`Display` - Uses `curses` to display information to the user.
+
+`Threads` - threads were used for each class in order for each to individually do the work they need to do.
 
 ### Alerting System
 
@@ -52,6 +67,8 @@ The app is designed to tail a file. There is an empty file `log-file.log` in `lo
 
 `python http_monitor.py log_files/log-file.log`
 
+`q` Will quit out of the app and kill threads
+
 #### Options
 
 `--threshold` - Set the threshold for hits / second. Default is 10 seconds.
@@ -66,6 +83,8 @@ In order for local development, a program was created to simulate logging to a f
 
 `python simulate.py log_files/sample_csv.txt log_files/log-file.log`
 
+Use `Ctrl-C` to exit
+
 ### Testing
 
 I made most methods private since the only two methods used within the classes are usually `run` or the method that returns data. In order to test and avoid having to add a package for mocking time and dealing with threads, the private method `should_alert_or_recover` was exposed for testing.
@@ -78,6 +97,7 @@ To run the three tests (alert, recover, recover then alert), in root folder...
 
 1. The `curses` implementation is a bit rough as it is my first time using the package and also first time writing an app that displays to a CLI. Better formatting, properly handling window resizing and handling top N with proper spacing would make the display better. For now, top N sections is locked to two sections because of spacing concerns.
 2. The simulator that can be used to simulate logging is a simple app that writes to a file line by line with a random sleep time in between each line. There may be better ways to simulate logging but for now the log lines are written to an monitered file slower than it would be in production environment.
+3. Test coverage can be added to other parts of the app. Currently only coverage for alerting states.
 
 ## Sources Used
 
