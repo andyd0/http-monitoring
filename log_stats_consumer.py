@@ -1,4 +1,5 @@
 from collections import Counter
+from collections import defaultdict
 from collections import deque
 from time import time
 import threading
@@ -18,6 +19,11 @@ class LogStatsConsumer(threading.Thread):
     """
 
     def __init__(self, interval, logs_queue):
+        """
+        Args:
+            interval (int): Interval to refresh stats
+            logs_queue (deque): Queue to get log lines as they are produced
+        """
         threading.Thread.__init__(self)
         self.interval = interval
         self.logs_queue = logs_queue
@@ -32,6 +38,7 @@ class LogStatsConsumer(threading.Thread):
         Starts the thread process
         """
         section_counts, status_counts = Counter(), Counter()
+        section_size = defaultdict(int)
         start_real_time = time()
 
         while not self.thread_terminated:
@@ -39,10 +46,13 @@ class LogStatsConsumer(threading.Thread):
                 self.stats_queue.append(self.logs_queue.popleft())
                 if (time() - start_real_time) >= self.interval:
                     start_real_time = time()
-                    self.__save_stats(section_counts, status_counts)
+                    self.__save_stats(
+                        section_size, section_counts, status_counts
+                    )
                     section_counts, status_counts = Counter(), Counter()
+                    section_size = defaultdict(int)
 
-    def __update_counts(self, section_counts, status_counts):
+    def __update_counts(self, section_size, section_counts, status_counts):
         """
         Gets log data from the local queue to update counts
         """
@@ -50,20 +60,31 @@ class LogStatsConsumer(threading.Thread):
             log_data = self.stats_queue.popleft()
             self.stats_data['hits'] += 1
             self.stats_data['size'] += log_data['size']
-            section_counts[log_data['section']] += 1
-            status_counts[log_data['status'][0]+"XX"] += 1
 
-    def __save_stats(self, section_counts, status_counts):
+            section = log_data['section']
+            status = log_data['status']
+            size = log_data['size']
+
+            section_size[section] += size
+            section_counts[section] += 1
+            status_counts[status[0]+"XX"] += 1
+
+    def __save_stats(self, section_size, section_counts, status_counts):
         """
         Copies the counters into data to be used by display
         so that new ones can be created for next interval
         """
-        self.__update_counts(section_counts, status_counts)
-        self.window_section_counts = Counter(section_counts)
-        self.window_status_counts = Counter(status_counts)
+        self.__update_counts(section_size, section_counts, status_counts)
+        self.stats_data["section_size"] = dict(section_size)
+        self.stats_data["section_counts"] = Counter(section_counts)
+        self.stats_data["status_counts"] = Counter(status_counts)
 
-    def updated_counts(self):
-        return self.window_section_counts, self.window_status_counts
+    def updated_stats_data(self):
+        """
+        Returns most up to date stats data for displaying
+            purposes
 
-    def updated_total_stats(self):
+        Returns:
+            dict: Dict of data that will be used for displaying
+        """
         return self.stats_data

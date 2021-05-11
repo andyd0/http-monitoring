@@ -36,47 +36,60 @@ class Display(threading.Thread):
         self.stdscr.nodelay(1)
 
         max_height, max_width = self.stdscr.getmaxyx()
-        self.stdscr.addstr(1, 2, "HTTP Log Monitoring App - Press q to exit")
-        window_border = self.stdscr.subwin(max_height-1, max_width, 0, 0)
-        window_border.border()
         alert_count = 0
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
         while not self.thread_terminated:
-            stats_data = self.stats.updated_total_stats()
+            self.stdscr.erase()
 
-            self.stdscr.addstr(4, 2, f'Total hits: {stats_data["hits"]}')
-            self.stdscr.addstr(5, 2, f'Total size in bytes: {stats_data["size"]}')
+            self.stdscr.addstr(1, 2, "HTTP Log Monitoring App (Press q to Quit)")
+            window_border = self.stdscr.subwin(max_height-1, max_width, 0, 0)
+            window_border.border()
 
-            self.stdscr.addstr(9, 2, "Stats from the Last 10 Seconds:")
+            stats_data = self.stats.updated_stats_data()
 
-            section_counts, status_counts = self.stats.updated_counts()
+            self.stdscr.addstr(4, 2, f'Total Hits: {stats_data["hits"]}')
+            self.stdscr.addstr(5, 2, f'Total in Bytes: {stats_data["size"]:,}')
 
-            y = 10
-            if section_counts and status_counts:
+            self.stdscr.addstr(8, 2, "Stats from the Last 10 Seconds:")
+
+            section_size = stats_data.get("section_size")
+            section_counts = stats_data.get("section_counts")
+            status_counts = stats_data.get("status_counts")
+
+            y = 9
+            if status_counts:
                 y += 1
                 self.stdscr.addstr(y, 2, "Status Code Counts:")
-                for line in self.__build_top_n(status_counts):
+                for line in self.__build_status_lines(status_counts):
                     y += 1
                     self.stdscr.addstr(y, 2, line)
 
-                y += 4
+                y += 3
                 self.stdscr.addstr(y, 2, "Top Sections:")
-                for line in self.__build_top_n(section_counts):
+                for line in self.__build_top_n_sections(section_size, section_counts):
                     y += 1
                     self.stdscr.addstr(y, 2, line)
 
             alert_data = self.alerts.updated_alert_data()
+            alert_count = alert_data['alert_count']
 
-            alert_text = "alert" if alert_data['alert_count'] == 1 else "alerts"
+            alert_text = "Alert" if alert_count == 1 else "Alerts"
 
-            alert_heading_line1 = f'There has been {alert_count} {alert_text} since'
-            alert_heading_line2 = f'monintoring started'
+            alert_heading_line1 = f'There Has Been {alert_count} {alert_text} Since'
+            alert_heading_line2 = f'Monintoring Started'
             self.stdscr.addstr(4, 50, alert_heading_line1)
             self.stdscr.addstr(5, 50, alert_heading_line2)
 
-            if 'msg_line1' in alert_data:
-                self.stdscr.addstr(7, 50, alert_data['msg_line1'])
-                self.stdscr.addstr(8, 50, alert_data['msg_line2'])
+            if 'type' in alert_data:
+                if alert_data['type'] == 'alert':
+                    self.stdscr.addstr(7, 50, "Alert!!!", curses.color_pair(1))
+                else:
+                    self.stdscr.addstr(7, 50, "Recovered", curses.color_pair(2))
+                self.stdscr.addstr(8, 50, alert_data['msg_line1'])
+                self.stdscr.addstr(9, 50, alert_data['msg_line2'])
 
             self.stdscr.refresh()
 
@@ -87,12 +100,24 @@ class Display(threading.Thread):
                 self.alerts.thread_terminated = True
                 self.thread_terminated = True
 
-    def __build_top_n(self, counts, n=3):
+    def __build_status_lines(self, counts):
         """
-        Takes Counters to get top n for printing to screen
+        Takes Status counters to get top n for printing to screen
         """
         lines = []
-        for code, count in counts.most_common(n):
+        for code, count in counts.most_common():
             line = f'{code}: {count}'
             lines.append(line)
+        return lines
+
+    def __build_top_n_sections(self, section_size, section_counts, n=3):
+        """
+        Takes Section counters to get top n for printing to screen
+        """
+        lines = []
+        for section, count in section_counts.most_common(n):
+            lines.append(f'Section: {section}')
+            lines.append(f'Count: {count}')
+            lines.append(f'Total in Bytes: {section_size[section]:,}')
+            lines.append(f'\n')
         return lines

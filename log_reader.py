@@ -7,16 +7,22 @@ import time
 class LogReader(threading.Thread):
     """A class used to read and parse log lines. It will also populate
     queues for the consumers
-    ...
 
     Attributes
     ----------
     log_file_path (str): Path to log file that should be tailed
     alert_queue (deque): Deque to be used by the Alert Consumer
     stats_queue (deque): Deque to be used by the Stats Consumer
+    thread_terminated (boolean): Flag to kill thread
     """
 
     def __init__(self, log_file_path, alert_queue, stats_queue):
+        """
+        Args:
+            log_file_path (str): Path to log file that should be tailed
+            alert_queue (deque): Deque to be used by the Alert Consumer
+            stats_queue (deque): Deque to be used by the Stats Consumer
+        """
         threading.Thread.__init__(self)
         self.log_file_path = log_file_path
         self.alert_queue = alert_queue

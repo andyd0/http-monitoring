@@ -87,6 +87,7 @@ class LogAlertConsumer(threading.Thread):
         """
         self.alert_data['alert_count'] += 1
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        self.alert_data['type'] = 'alert'
         self.alert_data['msg_line1'] = f'High traffic generated an alert:'
         self.alert_data['msg_line2'] = f'hits = {len(self.alert_queue)}, triggered at {date}'
 
@@ -95,15 +96,16 @@ class LogAlertConsumer(threading.Thread):
         Create recovered message using timestamp from log
         """
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        self.alert_data['type'] = 'recovered'
         self.alert_data['msg_line1'] = f'Traffic normalized - hits = {len(self.alert_queue)}'
         self.alert_data['msg_line2'] = f'recovered at {date}'
 
     def updated_alert_data(self):
-        """Returns most up to date alert data for displaying
+        """
+        Returns most up to date alert data for displaying
             purposes
 
         Returns:
             dict: Dict of data that will be used for displaying
-
         """
         return self.alert_data
