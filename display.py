@@ -68,7 +68,7 @@ class Display(threading.Thread):
                     self.stdscr.addstr(y, 2, line)
 
                 y += 3
-                self.stdscr.addstr(y, 2, "Top Sections:")
+                self.stdscr.addstr(y, 2, "Top Two Sections:")
                 for line in self.__build_top_n_sections(section_size, section_counts):
                     y += 1
                     self.stdscr.addstr(y, 2, line)
@@ -110,7 +110,7 @@ class Display(threading.Thread):
             lines.append(line)
         return lines
 
-    def __build_top_n_sections(self, section_size, section_counts, n=3):
+    def __build_top_n_sections(self, section_size, section_counts, n=2):
         """
         Takes Section counters to get top n for printing to screen
         """
