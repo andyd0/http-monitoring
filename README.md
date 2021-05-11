@@ -5,7 +5,35 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
 1. Alerting - the app will monitor HTTP traffic logs to alert within a set time window (default is 120 seconds) if the number of hits / second to the web app has breached a set threshold (default is 10 hits / second). The app will also display a recovered message when the average hits / second has dropped below the threshold
 2. Stats - the app will display several stats including total hits, total bytes and the top 2 sections with relevant data for each section. Data is refreshed every 10 seconds but can also be adjusted.
 
+- [HTTP Log Monitoring App](#http-log-monitoring-app)
+  - [Design](#design)
+    - [Alerting System](#alerting-system)
+  - [Instructions](#instructions)
+    - [Requirements](#requirements)
+    - [Running the app](#running-the-app)
+      - [Options](#options)
+      - [Simulating logging](#simulating-logging)
+  - [Potential Improvements](#potential-improvements)
+  - [Sources Used](#sources-used)
+    - [Threading](#threading)
+    - [Tailing A file](#tailing-a-file)
+    - [Parsing Log Lines](#parsing-log-lines)
+  - [Screenshots of the App](#screenshots-of-the-app)
+    - [Alert State](#alert-state)
+    - [Recovered State](#recovered-state)
+
 ## Design
+
+### Alerting System
+
+The main algorithm used is based on a sliding window technique. Timestamps are moved from the main queue to a local queue that will be filled within the time window set. This local queue is then used to get an approximate average hits / second for the time window by taking the length of this local queue and dividing it by the time window (eg. `len(local_queue) / 120`). Before this is computed, any early timestamps that are now outside of the window are popped off the queue.
+
+Several options were also explored for the alerting system. Since the log line timestamps can be slightly out of order...
+
+1. Min Heap was initially used to sort the data as it comes in but this would require adding and removing elements in the heap.
+2. Hash map with `timestamp mod time window size` as key to store counts by seconds
+
+But ultimately, the average hits / second was still be an approximation due to timestamps being out of order and end of time window handling.
 
 ## Instructions
 
@@ -19,7 +47,7 @@ App was tested both on MacOS Catalina and Windows 10. I tried to build without a
 
 ### Running the app
 
-The app is designed to tail a file. There is an empty file in `log_files` that can be used to write to but otherwise any file can be passed in. To start the app, use the following command...
+The app is designed to tail a file. There is an empty file `log-file.log` in `log_files` that can be used to write to but otherwise any file can be passed in. To start the app, use the following command...
 
 `python http_monitor.py log_files/log-file.log`
 
