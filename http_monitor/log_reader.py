@@ -64,7 +64,7 @@ class LogReader(threading.Thread):
         """
         Parses a log line using regex to get required data points.
         """
-        # Regex adopted from...
+        # Regex adapted from...
         # https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch07s12.html
         regex = re.compile(
             r'^(?P<client>\S+),(?P<skip>\S+),(?P<userid>\S+),(?P<time>.+),'

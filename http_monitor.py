@@ -6,7 +6,7 @@ from http_monitor.display import Display
 import argparse
 
 
-# Threading implementation adopted from
+# Threading implementation adapted from
 # "Python thread sample with handling Ctrl-C"
 # https://gist.github.com/ruedesign/5218221
 def start_monitoring(input_file_path, time_window, threshold, interval):
