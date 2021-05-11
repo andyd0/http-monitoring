@@ -1,8 +1,8 @@
 from collections import deque
-from log_alert_consumer import LogAlertConsumer
-from log_stats_consumer import LogStatsConsumer
-from log_reader import LogReader
-from display import Display
+from http_monitor.log_alert_consumer import LogAlertConsumer
+from http_monitor.log_stats_consumer import LogStatsConsumer
+from http_monitor.log_reader import LogReader
+from http_monitor.display import Display
 import argparse
 
 
