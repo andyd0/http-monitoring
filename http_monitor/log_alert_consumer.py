@@ -48,7 +48,7 @@ class LogAlertConsumer(threading.Thread):
                 self.alert_queue.append(timestamp)
 
                 if (time() - start_real_time) >= self.time_window:
-                    self.should_alert_or_recover(timestamp)
+                    self.__should_alert_or_recover(timestamp)
 
     def updated_alert_data(self):
         """
@@ -77,7 +77,7 @@ class LogAlertConsumer(threading.Thread):
         self.__remove_out_of_window_timestamps(timestamp)
         return (len(self.alert_queue) / self.time_window) > self.threshold
 
-    def should_alert_or_recover(self, timestamp):
+    def __should_alert_or_recover(self, timestamp):
         """
         Checks to see which state the alert service is currently in
 

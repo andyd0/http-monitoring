@@ -13,6 +13,7 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
     - [Running the app](#running-the-app)
       - [Options](#options)
       - [Simulating logging](#simulating-logging)
+    - [Testing](#testing)
   - [Potential Improvements](#potential-improvements)
   - [Sources Used](#sources-used)
     - [Threading](#threading)
@@ -64,6 +65,14 @@ The app is designed to tail a file. There is an empty file `log-file.log` in `lo
 In order for local development, a program was created to simulate logging to a file. This should be started separately. First file should be the data file and the second file is the log file that will be written too and monitored by the main app.
 
 `python simulate.py log_files/sample_csv.txt log_files/log-file.log`
+
+### Testing
+
+I made most methods private since the only two methods used within the classes are usually `run` or the method that returns data. In order to test and avoid having to add a package for mocking time and dealing with threads, the private method `should_alert_or_recover` was exposed for testing.
+
+To run the three tests (alert, recover, recover then alert), in root folder...
+
+`python -m unittest`
 
 ## Potential Improvements
 
