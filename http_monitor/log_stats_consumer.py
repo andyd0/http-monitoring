@@ -52,6 +52,16 @@ class LogStatsConsumer(threading.Thread):
                     section_counts, status_counts = Counter(), Counter()
                     section_size = defaultdict(int)
 
+    def updated_stats_data(self):
+        """
+        Returns most up to date stats data for displaying
+            purposes
+
+        Returns:
+            dict: Dict of data that will be used for displaying
+        """
+        return self.stats_data
+
     def __update_counts(self, section_size, section_counts, status_counts):
         """
         Gets log data from the local queue to update counts and size
@@ -79,13 +89,3 @@ class LogStatsConsumer(threading.Thread):
         self.stats_data["section_size"] = dict(section_size)
         self.stats_data["section_counts"] = Counter(section_counts)
         self.stats_data["status_counts"] = Counter(status_counts)
-
-    def updated_stats_data(self):
-        """
-        Returns most up to date stats data for displaying
-            purposes
-
-        Returns:
-            dict: Dict of data that will be used for displaying
-        """
-        return self.stats_data

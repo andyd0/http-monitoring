@@ -47,10 +47,18 @@ class LogAlertConsumer(threading.Thread):
                 timestamp = self.timestamps_queue.popleft()
                 self.alert_queue.append(timestamp)
 
-                # A second block may be missing entirely so can't
-                # be exact
                 if (time() - start_real_time) >= self.time_window:
                     self.__should_alert_or_recover(timestamp)
+
+    def updated_alert_data(self):
+        """
+        Returns most up to date alert data for displaying
+            purposes
+
+        Returns:
+            dict: Dict of data that will be used for displaying
+        """
+        return self.alert_data
 
     def __remove_out_of_window_timestamps(self, timestamp):
         """
@@ -61,9 +69,9 @@ class LogAlertConsumer(threading.Thread):
                 (timestamp - self.time_window) > self.alert_queue[0]:
             self.alert_queue.popleft()
 
-    def __has_breached_traffic(self, timestamp):
+    def __has_breached_threshold(self, timestamp):
         """
-        Approximate average of number of hits / second by taking the total
+        Approximate average of number of hits / second by taking the
         size of the local queue and divided it by the time window size
         """
         self.__remove_out_of_window_timestamps(timestamp)
@@ -73,7 +81,7 @@ class LogAlertConsumer(threading.Thread):
         """
         Checks to see which state the alert service is currently in
         """
-        current_state = self.__has_breached_traffic(timestamp)
+        current_state = self.__has_breached_threshold(timestamp)
         if not self.alerted and current_state:
             self.alerted = True
             self.__alert_message(timestamp)
@@ -89,7 +97,9 @@ class LogAlertConsumer(threading.Thread):
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
         self.alert_data['type'] = 'alert'
         self.alert_data['msg_line1'] = f'High traffic generated an alert:'
-        self.alert_data['msg_line2'] = f'hits = {len(self.alert_queue)}, triggered at {date}'
+        self.alert_data['msg_line2'] = (
+            f'hits = {len(self.alert_queue)}, triggered at {date}'
+        )
 
     def __recovered_message(self, timestamp):
         """
@@ -97,15 +107,7 @@ class LogAlertConsumer(threading.Thread):
         """
         date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
         self.alert_data['type'] = 'recovered'
-        self.alert_data['msg_line1'] = f'Traffic normalized - hits = {len(self.alert_queue)}'
+        self.alert_data['msg_line1'] = (
+            f'Traffic normalized - hits = {len(self.alert_queue)}'
+        )
         self.alert_data['msg_line2'] = f'recovered at {date}'
-
-    def updated_alert_data(self):
-        """
-        Returns most up to date alert data for displaying
-            purposes
-
-        Returns:
-            dict: Dict of data that will be used for displaying
-        """
-        return self.alert_data

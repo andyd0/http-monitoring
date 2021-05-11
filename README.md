@@ -26,7 +26,7 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
 
 ### Alerting System
 
-The main algorithm used is based on a sliding window technique. Timestamps are moved from the main queue to a local queue that will be filled within the time window set. This local queue is then used to get an approximate average hits / second for the time window by taking the length of this local queue and dividing it by the time window (eg. `len(local_queue) / 120`). Before this is computed, any early timestamps that are now outside of the window are popped off the queue.
+The main algorithm (check `has_breached_threshold` method in class `LogAlertConsumer`) used is based on a sliding window technique. Timestamps are moved from the main queue to a local queue that will be filled within the time window set. This local queue is then used to get an approximate average hits / second for the time window by taking the length of this local queue and dividing it by the time window (eg. `len(local_queue) / 120`). Before this is computed, any early timestamps that are now outside of the window are popped off the queue.
 
 Several options were also explored for the alerting system. Since the log line timestamps can be slightly out of order...
 
@@ -67,7 +67,7 @@ In order for local development, a program was created to simulate logging to a f
 
 ## Potential Improvements
 
-1. The `curses` implementation is a bit rough as it is my first time using the package and also first time writing an app that displays to a CLI. Better formatting, properly handling window resizing and handling top N with proper spacing would make the display better.
+1. The `curses` implementation is a bit rough as it is my first time using the package and also first time writing an app that displays to a CLI. Better formatting, properly handling window resizing and handling top N with proper spacing would make the display better. For now, top N sections is locked to two sections because of spacing concerns.
 2. The simulator that can be used to simulate logging is a simple app that writes to a file line by line with a random sleep time in between each line. There may be better ways to simulate logging but for now the log lines are written to an monitered file slower than it would be in production environment.
 
 ## Sources Used
