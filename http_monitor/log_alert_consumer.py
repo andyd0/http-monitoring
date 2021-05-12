@@ -98,7 +98,7 @@ class LogAlertConsumer(threading.Thread):
         self.alert_data['type'] = 'alert'
         self.alert_data['alert_count'] += 1
 
-        date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        date = datetime.fromtimestamp(timestamp).strftime('%b-%d-%Y %H:%M:%S')
         self.alert_data['last_alert_time'] = date
         self.alert_data['msg_line1'] = f'High traffic generated an alert:'
         self.alert_data['msg_line2'] = (
@@ -109,7 +109,7 @@ class LogAlertConsumer(threading.Thread):
         """
         Create recovered message using timestamp from log
         """
-        date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        date = datetime.fromtimestamp(timestamp).strftime('%b-%d-%Y %H:%M:%S')
         self.alert_data['type'] = 'recovered'
         self.alert_data['msg_line1'] = (
             f'Traffic normalized - hits = {len(self.alert_queue)}'
