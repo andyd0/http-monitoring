@@ -22,7 +22,6 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
   - [Sources Used](#sources-used)
     - [Threading](#threading)
     - [Tailing A file](#tailing-a-file)
-    - [Parsing Log Lines](#parsing-log-lines)
   - [Screenshots of the App](#screenshots-of-the-app)
     - [Alert State](#alert-state)
     - [Recovered State](#recovered-state)
@@ -69,6 +68,8 @@ App was tested both on MacOS Catalina and Windows 10. I tried to build without a
 1. Python 3.8.3 was used to build the app.
 2. `Windows` only dependency: `windows-curses` must be installed via `pip install windows-curses`.
 3. There are no other dependencies required.
+
+If there are any issues running the app, please let me know!
 
 ### Running the app
 
@@ -138,10 +139,6 @@ Originally, the app was set up to cancel the threads by typing Ctrl-C but this w
 ### Tailing A file
 
 Tailing file implementation is from a [presentation](https://github.com/dabeaz/generators/) on tools that leverage the use of Python generators.
-
-### Parsing Log Lines
-
-Regex to parse line for the data required was adapted from an online version of the book [Regular Expressions Cookbook](https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch07s12.html), which had a regex for common log formats.
 
 ## Screenshots of the App
 
