@@ -32,6 +32,7 @@ class LogStatsConsumer(threading.Thread):
         self.window_status_counts = None
         self.thread_terminated = False
         self.stats_data = {'hits': 0, 'size': 0}
+        self.lock = threading.Lock()
 
     def run(self):
         """
@@ -46,9 +47,12 @@ class LogStatsConsumer(threading.Thread):
                 self.stats_queue.append(self.logs_queue.popleft())
                 if (time() - start_real_time) >= self.interval:
                     start_real_time = time()
-                    self.__save_stats(
-                        section_size, section_counts, status_counts
-                    )
+
+                    with self.lock:
+                        self.__save_stats(
+                            section_size, section_counts, status_counts
+                        )
+
                     section_counts, status_counts = Counter(), Counter()
                     section_size = defaultdict(int)
 

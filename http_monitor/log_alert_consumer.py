@@ -35,6 +35,7 @@ class LogAlertConsumer(threading.Thread):
         self.alerted = False
         self.thread_terminated = False
         self.alert_data = {'alert_count': 0}
+        self.lock = threading.Lock()
 
     def run(self):
         """
@@ -48,7 +49,8 @@ class LogAlertConsumer(threading.Thread):
                 self.alert_queue.append(timestamp)
 
                 if (time() - start_real_time) >= self.time_window:
-                    self.__should_alert_or_recover(timestamp)
+                    with self.lock:
+                        self.__should_alert_or_recover(timestamp)
 
     def updated_alert_data(self):
         """
