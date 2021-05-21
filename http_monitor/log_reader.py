@@ -1,5 +1,4 @@
 import os
-import re
 import threading
 import time
 
@@ -62,30 +61,22 @@ class LogReader(threading.Thread):
 
     def __parse_log_line(self, log_line):
         """
-        Parses a log line using regex to get required data points.
+        Parses a log line to get required data points.
         """
-        # Regex adapted from...
-        # https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch07s12.html
-        regex = re.compile(
-            r'^(?P<client>\S+),(?P<skip>\S+),(?P<userid>\S+),(?P<time>.+),'
-            r'"(?P<method>[A-Z]+) (?P<section>[^ "]+)? HTTP/[0-9.]+",'
-            r'(?P<status>[0-9]{3}),(?P<size>[0-9]+|-)'
-        )
+        client, _, user_id, time, section, status, size = log_line.split(',')
 
-        # In case there any log lines with malformed lines, return none.
-        # Likely enough log lines that a few ones missed won't make a
-        # difference
-        matched = re.match(regex, log_line)
-        if not matched:
-            return None
-
-        matched_dict = matched.groupdict()
-
+        data = {}
         try:
-            matched_dict['time'] = int(matched['time'])
-            matched_dict['size'] = int(matched['size'])
-            matched_dict['section'] = matched_dict['section'].split('/')[1]
+            data['client'] = client.strip('"')
+            data['user_id'] = user_id.strip('"')
+            data['time'] = int(time)
+            data['status'] = status
+            data['size'] = int(size.rstrip())
+
+            section_parts = section.strip('"').split(' ')
+            data['method'] = section_parts[0]
+            data['section'] = section_parts[1].split('/')[1]
         except (ValueError, IndexError):
             return None
 
-        return matched_dict
+        return data
