@@ -17,7 +17,6 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
       - [Simulating logging](#simulating-logging)
     - [Testing](#testing)
   - [Potential Improvements](#potential-improvements)
-    - [General App Improvements](#general-app-improvements)
     - [Scaling](#scaling)
   - [Sources Used](#sources-used)
     - [Threading](#threading)
@@ -63,13 +62,11 @@ But ultimately, the average hits / second was still an approximation due to time
 
 ### Requirements
 
-App was tested both on MacOS Catalina and Windows 10. I tried to build without any external dependencies but `curses` does need a package to be installed on `Windows` in order for proper functionality.
+App was tested both on MacOS Catalina and Windows 10.
 
 1. Python 3.8.3 was used to build the app.
 2. `Windows` only dependency: `windows-curses` must be installed via `pip install windows-curses`.
 3. There are no other dependencies required.
-
-If there are any issues running the app, please let me know!
 
 ### Running the app
 
@@ -77,7 +74,7 @@ The app is designed to tail a file. There is an empty file `log-file.log` in `lo
 
 `python http_monitor.py log_files/log-file.log`
 
-`NOTE`: Since the app is designed around `tailing a file`, passing in the provided `sample_csv.txt` file `will not work`. If log file to tail isn't available, this can be simulated as described below.
+`NOTE`: Since the app is designed around `tailing a file`, passing in the provided `sample_csv.txt` file `will not work`. If a log file to tail isn't available, this can be simulated as described below.
 
 Use `q` to quit out of the app and cleanly terminate the threads.
 
@@ -99,24 +96,15 @@ Use `Ctrl-C` to exit.
 
 ### Testing
 
-I made most methods private since the only two methods used within the classes are usually `run` or the method that returns data. In order to test and avoid having to add a package for mocking time and dealing with threads, the private method `should_alert_or_recover` was exposed for testing.
-
-To run the three tests (alert, recover, recover then alert), in root folder...
+To run the unit tests (alert, recover, recover then alert), in root folder...
 
 `python -m unittest`
 
 ## Potential Improvements
 
-### General App Improvements
-
-1. The `curses` implementation is a bit rough as it is my first time using the package and also first time writing an app that displays to a CLI. Better formatting, properly handling window resizing and handling top N with proper spacing would make the display better. For now, top N sections is locked to two sections because of spacing concerns.
-2. The simulator that can be used to simulate logging is a simple app that writes to a file line by line with a random sleep time in between each line. There may be better ways to simulate logging but for now the log lines are written to an monitered file slower than it would be in production environment.
-3. Test coverage can be added to other parts of the app. Currently, there is only test coverage for alerting states.
-4. Stats consumer could probably use a refactor so that it isn't one method that updates counts for the stats. Also, only basic top level counts are provided but it may be also helpful to track other stats like what is the most frequent status code or most frequent IP for each section
-
 ### Scaling
 
-Generally, I believe the app is app efficient enough as it never reads data entirely into memory but only chunks data is saved temporarily based on set interval and window size times.
+Generally, the app is efficient as it never reads data entirely into memory but only chunks of data is saved temporarily based on set interval and window size times.
 
 For scaling,
 
