@@ -18,10 +18,6 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
     - [Testing](#testing)
   - [Potential Improvements](#potential-improvements)
     - [Scaling](#scaling)
-  - [Sources Used](#sources-used)
-    - [Threading](#threading)
-    - [Tailing A file](#tailing-a-file)
-  - [Screenshots of the App](#screenshots-of-the-app)
     - [Alert State](#alert-state)
     - [Recovered State](#recovered-state)
 
@@ -113,22 +109,6 @@ For scaling,
 2. The producer-consumer pattern used in the app lends itself well to a Kafka like setup where data from producers are moved to queues on Kafka. The consumers can then take from these queues as required. This also allows for scaling of the intake queues as traffic requires.
 
 3. The consumers can also be moved to their own servers dependent on computing need since they are independent of each other and use their own queues of data.
-
-## Sources Used
-
-There are comments in the app pointing out where sources were used for implementation adaption. The sources used are also listed here.
-
-### Threading
-
-Threading implementation adapted from a gist ["Python thread sample with handling Ctrl-C"](https://gist.github.com/ruedesign/5218221).
-
-Originally, the app was set up to cancel the threads by typing Ctrl-C but this was changed to setting the termination to `False` within `Display`. How the threads are set up per class is also based on this source.
-
-### Tailing A file
-
-Tailing file implementation is from a [presentation](https://github.com/dabeaz/generators/) on tools that leverage the use of Python generators.
-
-## Screenshots of the App
 
 ### Alert State
 
