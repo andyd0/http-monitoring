@@ -16,8 +16,6 @@ This HTTP Log Monitoring App can be used to tail a log file, which will alert if
       - [Options](#options)
       - [Simulating logging](#simulating-logging)
     - [Testing](#testing)
-  - [Potential Improvements](#potential-improvements)
-    - [Scaling](#scaling)
     - [Alert State](#alert-state)
     - [Recovered State](#recovered-state)
 
@@ -95,20 +93,6 @@ Use `Ctrl-C` to exit.
 To run the unit tests (alert, recover, recover then alert), in root folder...
 
 `python -m unittest`
-
-## Potential Improvements
-
-### Scaling
-
-Generally, the app is efficient as it never reads data entirely into memory but only chunks of data is saved temporarily based on set interval and window size times.
-
-For scaling,
-
-1. Ideally log monitoring and processing is not done on the same server and especially not on the app server.
-
-2. The producer-consumer pattern used in the app lends itself well to a Kafka like setup where data from producers are moved to queues on Kafka. The consumers can then take from these queues as required. This also allows for scaling of the intake queues as traffic requires.
-
-3. The consumers can also be moved to their own servers dependent on computing need since they are independent of each other and use their own queues of data.
 
 ### Alert State
 
